@@ -12,30 +12,44 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Primary robust fetch via youtubei.js
+    // Direct InnerTube POST via youtube.actions.execute to bypass HTML scraping entirely
     const youtube = await Innertube.create({
       generate_session_locally: true,
       cache: new UniversalCache(false)
     });
     
-    const info = await youtube.getInfo(videoId);
-    if (!info.captions || !info.captions.caption_tracks) {
+    const res = await youtube.actions.execute('/player', {
+      videoId: videoId,
+      client: 'ANDROID',
+      parse: false
+    });
+    
+    const data = res.data;
+    const hasTracks = !!(data?.captions?.playerCaptionsTracklistRenderer?.captionTracks);
+    
+    if (!hasTracks || !data?.captions) {
       throw new Error("Transcript is disabled");
     }
     
-    const tracks = info.captions.caption_tracks;
-    const track = tracks.find(t => t.language_code.startsWith('en')) || tracks[0];
+    const tracks = data.captions.playerCaptionsTracklistRenderer.captionTracks;
+    const track = tracks.find((t: any) => t.languageCode.startsWith('en')) || tracks[0];
     
-    const trackUrl = track.base_url + '&fmt=json3';
-    const res = await fetch(trackUrl);
-    const data = await res.json();
+    let trackUrl = track.baseUrl;
+    if (trackUrl.includes('fmt=srv3')) {
+      trackUrl = trackUrl.replace('fmt=srv3', 'fmt=json3');
+    } else {
+      trackUrl += '&fmt=json3';
+    }
     
-    if (!data.events) {
+    const subRes = await fetch(trackUrl);
+    const subData = await subRes.json();
+    
+    if (!subData.events) {
       throw new Error("Transcript is disabled");
     }
     
     const transcript = [];
-    for (const event of data.events) {
+    for (const event of subData.events) {
       if (!event.segs) continue;
       const text = event.segs.map((s: any) => s.utf8).join('').trim();
       if (text !== '\n' && text !== '') {
