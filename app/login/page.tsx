@@ -1,6 +1,6 @@
 import { login, signup } from "./actions";
 import Link from "next/link";
-import { Play } from "lucide-react";
+
 
 export default async function LoginPage({
   searchParams,
@@ -14,9 +14,7 @@ export default async function LoginPage({
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 font-sans selection:bg-accent/20 selection:text-primary">
       <div className="absolute top-8 left-8">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary hover:opacity-80 transition-opacity">
-          <div className="h-6 w-6 bg-primary text-background rounded flex items-center justify-center">
-            <Play className="h-3 w-3 ml-0.5 fill-current" />
-          </div>
+          <img src="/tubelens.png" alt="TubeLens Logo" className="h-6 w-auto object-contain" />
           TubeLens
         </Link>
       </div>

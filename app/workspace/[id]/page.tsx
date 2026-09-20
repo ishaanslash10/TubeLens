@@ -6,7 +6,7 @@ import { WorkspaceProvider } from "@/components/workspace/workspace-context";
 import { YouTubePlayer } from "@/components/workspace/youtube-player";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Play, LogOut, LayoutGrid, Settings, LogIn } from "lucide-react";
+import { LogOut, LayoutGrid, Settings, LogIn } from "lucide-react";
 import { signout } from "@/app/login/actions";
 
 export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
@@ -61,9 +61,7 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
         <header className="h-16 shrink-0 bg-background border-b border-border flex items-center justify-between px-6 z-40 relative">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary hover:opacity-80 transition-opacity">
-              <div className="h-6 w-6 bg-primary text-background rounded flex items-center justify-center">
-                <Play className="h-3 w-3 ml-0.5 fill-current" />
-              </div>
+              <img src="/tubelens.png" alt="TubeLens Logo" className="h-6 w-auto object-contain" />
               TubeLens
             </Link>
             

@@ -49,9 +49,7 @@ export function LandingPage() {
       {/* 1. NAVBAR */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-md border-b border-border z-50 px-6 lg:px-12 flex items-center justify-between transition-all">
         <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary">
-          <div className="h-6 w-6 bg-primary text-background rounded flex items-center justify-center">
-            <Play className="h-3 w-3 ml-0.5 fill-current" />
-          </div>
+          <img src="/tubelens.png" alt="TubeLens Logo" className="h-6 w-auto object-contain" />
           TubeLens
         </div>
         
@@ -576,9 +574,7 @@ export function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
             <div className="lg:col-span-1 space-y-4">
               <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-primary">
-                <div className="h-6 w-6 bg-primary text-background rounded flex items-center justify-center">
-                  <Play className="h-3 w-3 ml-0.5 fill-current" />
-                </div>
+                <img src="/tubelens.png" alt="TubeLens Logo" className="h-6 w-auto object-contain" />
                 TubeLens
               </div>
               <p className="text-sm text-muted-foreground text-balance">
