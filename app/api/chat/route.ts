@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const safeTranscriptText = transcriptText ? transcriptText.slice(0, 50000) : "";
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: message,
       config: {
         systemInstruction: `You are TubeLens, an AI companion for YouTube (working with video ID: ${videoId}).

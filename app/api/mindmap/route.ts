@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const safeTranscriptText = transcriptText ? transcriptText.slice(0, 50000) : "";
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: 'gemini-3.5-flash-lite',
       contents: "Generate a comprehensive mind map of the core concepts in this video.",
       config: {
         systemInstruction: `You are TubeLens. Create a Mermaid.js mindmap summarizing the key concepts of the provided video transcript.

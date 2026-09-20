@@ -53,8 +53,9 @@ export function Chat({ videoId }: { videoId: string }) {
   };
 
   const preprocessCitations = (text: string) => {
-    return text.replace(/\[\s*cite:([\d\s\-\,;a-zA-Z]*)\]/gi, (match, inner) => {
-      return `[cite](#cite-${inner.trim()})`;
+    return text.replace(/(?:\[\s*cite\s*:\s*([\d\s\-\,;a-zA-Z]+)\s*\]|\[\s*cite\s*\]\(\s*(?:cite-)?([\d\s\-\,;a-zA-Z]+)\s*\))/gi, (match, g1, g2) => {
+      const inner = g1 || g2 || "";
+      return `[cite](#cite-${inner.replace(/\s+/g, '')})`;
     });
   };
 
