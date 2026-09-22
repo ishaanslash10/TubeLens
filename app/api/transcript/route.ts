@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 import { Innertube, UniversalCache } from "youtubei.js";
 import { YoutubeTranscript } from "youtube-transcript";
@@ -11,6 +11,48 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing videoId" }, { status: 400 });
   }
 
+  // 1. Primary Provider: Supadata
+  const supadataKey = process.env.SUPADATA_API_KEY;
+  if (supadataKey) {
+    try {
+      const supadataRes = await fetch(`https://api.supadata.ai/v1/transcript?url=https://www.youtube.com/watch?v=${videoId}`, {
+        headers: {
+          'x-api-key': supadataKey,
+          'Accept': 'application/json'
+        }
+      });
+      if (supadataRes.ok) {
+        const data = await supadataRes.json();
+        if (data.content && Array.isArray(data.content) && data.content.length > 0) {
+          const transcript = data.content
+            .filter((segment: any) =>
+              typeof segment?.text === "string" &&
+              segment.text.trim().length > 0 &&
+              typeof segment?.offset === "number" &&
+              Number.isFinite(segment.offset) &&
+              typeof segment?.duration === "number" &&
+              Number.isFinite(segment.duration)
+            )
+            .map((segment: any) => ({
+              text: segment.text,
+              offset: segment.offset / 1000,
+              duration: segment.duration / 1000
+            }));
+            
+          if (transcript.length > 0) {
+            return NextResponse.json({ transcript, source: "supadata" });
+          } else {
+            console.warn("Supadata API returned data, but all segments were malformed.");
+          }
+        }
+      } else {
+        console.warn("Supadata API failed, falling back to InnerTube. Status:", supadataRes.status);
+      }
+    } catch (supadataError) {
+      console.error("Supadata request error, falling back:", supadataError);
+    }
+  }
+
   try {
     // Direct InnerTube POST via youtube.actions.execute to bypass HTML scraping entirely
     const youtube = await Innertube.create({
@@ -20,7 +62,7 @@ export async function GET(req: NextRequest) {
     
     const res = await youtube.actions.execute('/player', {
       videoId: videoId,
-      client: 'ANDROID',
+      client: 'WEB_EMBEDDED',
       parse: false
     });
     
