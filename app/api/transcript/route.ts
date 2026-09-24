@@ -12,16 +12,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing videoId" }, { status: 400 });
   }
 
-  // 1. Primary Provider: Supadata
-  const supadataKey = process.env.SUPADATA_API_KEY;
-  if (supadataKey) {
+  // 1. Primary Provider: Supadata (Sequential Failover Pipeline)
+  const supadataKeys = [
+    process.env.SUPADATA_API_KEY_1,
+    process.env.SUPADATA_API_KEY_2,
+    process.env.SUPADATA_API_KEY_3
+  ].filter(Boolean);
+
+  let supadataSucceeded = false;
+
+  for (let i = 0; i < supadataKeys.length; i++) {
+    const key = supadataKeys[i];
     try {
       const supadataRes = await fetch(`https://api.supadata.ai/v1/transcript?url=https://www.youtube.com/watch?v=${videoId}`, {
         headers: {
-          'x-api-key': supadataKey,
+          'x-api-key': key!,
           'Accept': 'application/json'
         }
       });
+      
       if (supadataRes.ok) {
         const data = await supadataRes.json();
         if (data.content && Array.isArray(data.content) && data.content.length > 0) {
@@ -41,17 +50,50 @@ export async function GET(req: NextRequest) {
             }));
             
           if (transcript.length > 0) {
+            supadataSucceeded = true;
             return NextResponse.json({ transcript, source: "supadata" });
           } else {
-            console.warn("Supadata API returned data, but all segments were malformed.");
+            console.warn(`Supadata API returned data on key ${i+1}, but all segments were malformed.`);
+            // Content error, do not burn more keys
+            break;
           }
+        } else {
+            console.warn(`Supadata API returned empty/invalid content on key ${i+1}.`);
+            break; // Content error, do not burn more keys
         }
       } else {
-        console.warn("Supadata API failed, falling back to InnerTube. Status:", supadataRes.status);
+        const status = supadataRes.status;
+        const retryable = [401, 402, 403, 429, 500, 502, 503, 504].includes(status);
+        
+        if (retryable) {
+          if (status === 403) {
+            let isQuotaOrPlanError = false;
+            try {
+              const errorBody = await supadataRes.text();
+              const errorStr = errorBody.toLowerCase();
+              isQuotaOrPlanError = errorStr.includes('quota') || errorStr.includes('plan') || errorStr.includes('subscription') || errorStr.includes('permission') || errorStr.includes('limit');
+            } catch (e) {}
+            
+            if (!isQuotaOrPlanError) {
+              console.warn(`Supadata API returned 403 content restriction on key ${i+1}. Skipping remaining keys and falling back.`);
+              break;
+            }
+          }
+          console.warn(`Supadata key ${i+1} failed with retryable status ${status}, trying next key if available.`);
+          continue;
+        } else {
+          console.warn(`Supadata API returned non-retryable error (status ${status}) on key ${i+1}. Skipping remaining keys and falling back.`);
+          break;
+        }
       }
     } catch (supadataError) {
-      console.error("Supadata request error, falling back:", supadataError);
+      console.error(`Supadata request network error on key ${i+1}, trying next key if available:`, supadataError);
+      continue;
     }
+  }
+
+  if (!supadataSucceeded && supadataKeys.length > 0) {
+    console.warn("All available Supadata keys failed or returned content errors; falling back to InnerTube.");
   }
 
   try {
