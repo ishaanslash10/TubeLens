@@ -91,38 +91,41 @@ export function TranscriptPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-xl border border-border shadow-sm overflow-hidden z-10 font-sans">
+    <div className="flex flex-col h-full bg-transparent rounded-2xl overflow-hidden z-10 font-sans">
       <div 
         ref={scrollContainerRef}
         onWheel={handleScroll}
         onTouchMove={handleScroll}
-        className="flex-1 overflow-y-auto p-4 relative"
+        className="flex-1 overflow-y-auto p-3 sm:p-4 relative scroll-smooth"
       >
         {isLoadingTranscript ? (
-          <div className="flex h-full items-center justify-center text-muted-foreground flex-col gap-4">
-            <Loader2 className="h-6 w-6 animate-spin text-accent" />
-            <span className="text-sm font-medium">Extracting transcript...</span>
+          <div className="flex h-full items-center justify-center flex-col gap-4">
+            <div className="relative h-10 w-10">
+              <div className="absolute inset-0 border-2 border-white/[0.06] rounded-full" />
+              <div className="absolute inset-0 border-2 border-electric rounded-full border-t-transparent animate-spin" />
+            </div>
+            <span className="text-xs font-medium text-muted-foreground tracking-wide">Extracting transcript...</span>
           </div>
         ) : transcriptError && transcriptErrorCode !== "CAPTIONS_UNAVAILABLE" ? (
           <div className="flex h-full items-center justify-center">
-            <div className="flex items-center gap-3 text-destructive text-sm bg-destructive/10 px-6 py-4 rounded-xl border border-destructive/20 max-w-md">
-              <AlertCircle className="h-5 w-5 shrink-0" />
-              <p className="leading-relaxed">{transcriptError}</p>
+            <div className="flex items-center gap-3 text-red-400 text-sm glass-panel px-5 py-4 rounded-xl border-red-500/10 max-w-md">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <p className="leading-relaxed text-xs">{transcriptError}</p>
             </div>
           </div>
         ) : transcriptError && transcriptErrorCode === "CAPTIONS_UNAVAILABLE" ? (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <div className="bg-secondary/10 p-8 rounded-2xl border border-border text-center max-w-sm flex flex-col items-center">
-              <div className="h-12 w-12 rounded-full bg-secondary/80 flex items-center justify-center mx-auto mb-5 border border-border/50">
-                <Languages className="h-5 w-5 text-muted-foreground" />
+          <div className="flex h-full items-center justify-center">
+            <div className="glass-panel p-8 rounded-2xl text-center max-w-xs flex flex-col items-center">
+              <div className="h-12 w-12 rounded-xl glass-panel-active flex items-center justify-center mx-auto mb-5">
+                <Languages className="h-5 w-5 text-electric-bright" />
               </div>
-              <h3 className="font-semibold text-primary mb-3 text-lg tracking-tight">Transcript unavailable for this video</h3>
-              <p className="text-sm text-balance mb-4 leading-relaxed">This video doesn't provide captions, so TubeLens can't generate a transcript right now.</p>
-              <p className="text-sm text-balance text-muted-foreground leading-relaxed">You can still watch the video normally. If captions become available, TubeLens will be able to use them automatically.</p>
+              <h3 className="font-semibold text-primary mb-2 text-sm tracking-tight">Transcript unavailable</h3>
+              <p className="text-xs text-muted-foreground text-balance mb-3 leading-relaxed">This video doesn't provide captions, so TubeLens can't generate a transcript right now.</p>
+              <p className="text-xs text-balance text-muted-foreground/70 leading-relaxed">You can still watch the video normally. If captions become available, TubeLens will be able to use them automatically.</p>
             </div>
           </div>
         ) : transcript && transcript.length > 0 ? (
-          <div className="space-y-1.5 pb-24 relative">
+          <div className="space-y-0.5 pb-24 relative">
             {transcript.map((item, i) => {
               const isActive = i === activeIndex;
               return (
@@ -130,12 +133,24 @@ export function TranscriptPanel() {
                   key={i} 
                   ref={(el) => { itemRefs.current[i] = el; }}
                   onClick={() => handleSeek(item.offset, i)}
-                  className={`flex gap-4 p-3 rounded-lg transition-all cursor-pointer border-l-4 ${isActive ? "bg-accent/10 border-l-accent shadow-sm" : "border-l-transparent hover:bg-secondary/40"}`}
+                  className={`flex gap-3 px-3 py-2.5 rounded-lg transition-all duration-500 motion-fluid cursor-pointer group ${
+                    isActive 
+                      ? "glass-panel-active shadow-blue-glow" 
+                      : "hover:bg-white/[0.03]"
+                  }`}
                 >
-                  <div className={`text-xs font-mono pt-0.5 min-w-[50px] transition-colors ${isActive ? "text-accent font-bold" : "text-muted-foreground font-medium"}`}>
+                  <div className={`text-[11px] font-mono pt-0.5 min-w-[44px] tabular-nums transition-colors duration-400 ${
+                    isActive 
+                      ? "text-electric-bright font-semibold glow-blue-subtle" 
+                      : "text-muted-foreground group-hover:text-slate-400"
+                  }`}>
                     {Math.floor(item.offset / 60)}:{(Math.floor(item.offset % 60)).toString().padStart(2, "0")}
                   </div>
-                  <div className={`text-sm leading-relaxed transition-colors text-pretty ${isActive ? "text-primary font-semibold" : "text-foreground/80"}`}>
+                  <div className={`text-[13px] leading-relaxed transition-all duration-400 text-pretty ${
+                    isActive 
+                      ? "text-primary font-medium" 
+                      : "text-slate-400 group-hover:text-slate-300"
+                  }`}>
                     {item.text}
                   </div>
                 </div>

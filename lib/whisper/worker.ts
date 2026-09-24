@@ -57,9 +57,9 @@ self.addEventListener('message', async (e: MessageEvent) => {
         stride_length_s: 5,
         return_timestamps: true,
       });
-      console.log(`[STT-WORKER] RESULT_CHUNKS=${result?.chunks?.length} RAW_FIRST_CHUNK=${JSON.stringify(result?.chunks?.[0] || {})}`);
+      // console.log(`[STT-WORKER] RESULT_CHUNKS=${result?.chunks?.length} RAW_FIRST_CHUNK=${JSON.stringify(result?.chunks?.[0] || {})}`);
 
-      console.log("[STT-WORKER] Transcription result:", result); self.postMessage({ type: 'complete', result });
+      // console.log("[STT-WORKER] Transcription result:", result); self.postMessage({ type: 'complete', result });
     } catch (err: any) {
       self.postMessage({ type: 'error', error: err.message });
     }

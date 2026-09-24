@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { VISUAL_TEST_TRANSCRIPT } from "../../lib/transcript-fixture";
 
 export type TranscriptItem = {
   id?: number;
@@ -16,7 +18,7 @@ type WorkspaceContextType = {
   isLoadingTranscript: boolean;
   transcriptError: string | null;
   transcriptErrorCode: string | null;
-  transcriptSource: "youtube" | "whisper" | null;
+  transcriptSource: "youtube" | "whisper" | "fixture" | null;
   
   // Local STT
   localSTTStatus: "idle" | "requesting" | "capturing" | "transcribing" | "complete" | "error" | "unsupported";
@@ -55,11 +57,14 @@ export function WorkspaceProvider({
   videoId: string;
   workspaceId: string | null;
 }) {
+  const searchParams = useSearchParams();
+  const isVisualTest = searchParams.get("visualTest") === "true";
+
   const [transcript, setTranscript] = useState<TranscriptItem[] | null>(null);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(true);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [transcriptErrorCode, setTranscriptErrorCode] = useState<string | null>(null);
-  const [transcriptSource, setTranscriptSource] = useState<"youtube" | "whisper" | null>(null);
+  const [transcriptSource, setTranscriptSource] = useState<"youtube" | "whisper" | "fixture" | null>(null);
   
   const [localSTTStatus, setLocalSTTStatus] = useState<WorkspaceContextType["localSTTStatus"]>("idle");
   const [localSTTProgress, setLocalSTTProgress] = useState(0);
@@ -141,6 +146,22 @@ export function WorkspaceProvider({
     async function fetchTranscript() {
       try {
         setIsLoadingTranscript(true);
+
+        // Visual Test Mode bypass for local development UI testing
+        if (isVisualTest && process.env.NODE_ENV === "development") {
+          // console.log("[Visual Test Mode] Bypassing /api/transcript and using local fixture.");
+          // Add a small synthetic delay to simulate network load
+          await new Promise(r => setTimeout(r, 600));
+          if (isMounted) {
+            setTranscript(VISUAL_TEST_TRANSCRIPT);
+            setTranscriptSource("fixture");
+            setTranscriptError(null);
+            setTranscriptErrorCode(null);
+            setIsLoadingTranscript(false);
+          }
+          return;
+        }
+
         const res = await fetch(`/api/transcript?videoId=${videoId}`);
         const data = await res.json();
         
@@ -197,13 +218,13 @@ export function WorkspaceProvider({
           const { type, result, error } = e.data;
           
           if (type === "complete") {
-            console.log("[STT] Worker returned COMPLETE:", result);
+            // console.log("[STT] Worker returned COMPLETE:", result);
           }
           if (type === "complete" && result && result.chunks) {
-            console.log(`[STT] WHISPER_RESULT text="${result.text.substring(0, 30)}..." chunks=${result.chunks?.length}`);
-            if (result.text.trim() === "") console.log("[STT] WHISPER_RESULT_EMPTY");
+            // console.log(`[STT] WHISPER_RESULT text="${result.text.substring(0, 30)}..." chunks=${result.chunks?.length}`);
+            if (result.text.trim() === "") // console.log("[STT] WHISPER_RESULT_EMPTY");
             setTranscript(prev => {
-              console.log(`[STT] TRANSCRIPT_BEFORE=${prev?.length || 0}`);
+              // console.log(`[STT] TRANSCRIPT_BEFORE=${prev?.length || 0}`);
               const baseTime = baseTimeQueueRef.current.shift() || 0;
               const newSegments = result.chunks
                 .filter((c: any) => !c.timestamp || c.timestamp[0] < 25) // Safely discard 5s overlap
@@ -216,10 +237,10 @@ export function WorkspaceProvider({
                     duration: end - start
                   };
                 });
-              console.log(`[STT] CANONICAL_SEGMENTS=${newSegments.length}`);
-              console.log(`[STT] TRANSCRIPT_AFTER=${(prev?.length || 0) + newSegments.length}`);
+              // console.log(`[STT] CANONICAL_SEGMENTS=${newSegments.length}`);
+              // console.log(`[STT] TRANSCRIPT_AFTER=${(prev?.length || 0) + newSegments.length}`);
               if (newSegments.length > 0) {
-                console.log(`[STT] FIRST_NEW_SEGMENT: ${JSON.stringify(newSegments[0])}`);
+                // console.log(`[STT] FIRST_NEW_SEGMENT: ${JSON.stringify(newSegments[0])}`);
               }
               return [...(prev || []), ...newSegments];
             });
@@ -253,8 +274,8 @@ export function WorkspaceProvider({
         transcriberPlayerRef.current.playVideo();
       }
 
-      console.log(`[STT] PLAYER_READY=${!!transcriberPlayerRef.current}`);
-      console.log(`[STT] PLAYER_STATE=${transcriberStateRef.current}`);
+      // console.log(`[STT] PLAYER_READY=${!!transcriberPlayerRef.current}`);
+      // console.log(`[STT] PLAYER_STATE=${transcriberStateRef.current}`);
 
       // Native getDisplayMedia
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -266,16 +287,16 @@ export function WorkspaceProvider({
 
 
       // Verify audio
-      console.log(`[STT] CAPTURE_STREAM_ID=${stream.id}`);
+      // console.log(`[STT] CAPTURE_STREAM_ID=${stream.id}`);
       const audioTracks = stream.getAudioTracks();
-      console.log(`[STT] CAPTURE_AUDIO_TRACKS=${audioTracks.length}`);
+      // console.log(`[STT] CAPTURE_AUDIO_TRACKS=${audioTracks.length}`);
       if (audioTracks[0]) {
-        console.log(`[STT] TRACK_READY_STATE=${audioTracks[0].readyState}`);
-        console.log(`[STT] TRACK_MUTED=${audioTracks[0].muted}`);
-        console.log(`[STT] TRACK_SETTINGS=${JSON.stringify(audioTracks[0].getSettings())}`);
+        // console.log(`[STT] TRACK_READY_STATE=${audioTracks[0].readyState}`);
+        // console.log(`[STT] TRACK_MUTED=${audioTracks[0].muted}`);
+        // console.log(`[STT] TRACK_SETTINGS=${JSON.stringify(audioTracks[0].getSettings())}`);
       }
       if (audioTracks.length === 0) {
-        console.log(`[STT] CAPTURE_AUDIO_TRACKS=0 - Browser unsupported or user denied audio.`);
+        // console.log(`[STT] CAPTURE_AUDIO_TRACKS=0 - Browser unsupported or user denied audio.`);
         stream.getTracks().forEach(t => t.stop());
         
         // Stop transcriber player immediately
@@ -311,7 +332,7 @@ export function WorkspaceProvider({
           const duration = transcriberPlayerRef.current.getDuration() || 1;
           const current = transcriberPlayerRef.current.getCurrentTime();
           if (isCapturingRef.current) {
-            console.log(`[STT] PLAYER_TIME=${current.toFixed(2)} / ${duration.toFixed(2)} | STATE=${transcriberStateRef.current}`);
+            // console.log(`[STT] PLAYER_TIME=${current.toFixed(2)} / ${duration.toFixed(2)} | STATE=${transcriberStateRef.current}`);
           }
           setLocalSTTProgress(Math.min(100, Math.round((current / duration) * 100)));
         }
@@ -320,8 +341,8 @@ export function WorkspaceProvider({
 
       // Web Audio processing
       const audioCtx = new AudioContext({ sampleRate: 16000 });
-      console.log(`[STT] AUDIO_CONTEXT_STATE=${audioCtx.state}`);
-      console.log(`[STT] AUDIO_SAMPLE_RATE=${audioCtx.sampleRate}`);
+      // console.log(`[STT] AUDIO_CONTEXT_STATE=${audioCtx.state}`);
+      // console.log(`[STT] AUDIO_SAMPLE_RATE=${audioCtx.sampleRate}`);
       audioCtxRef.current = audioCtx;
       streamRef.current = stream;
 
@@ -355,9 +376,9 @@ export function WorkspaceProvider({
            for(let i=0; i<inputData.length; i++) sumSq += inputData[i]*inputData[i];
            const rms = Math.sqrt(sumSq / inputData.length);
            if (rms === 0 || isNaN(rms)) {
-             console.log("[STT] AUDIO IS SILENT AT WEB AUDIO INPUT (RMS=0)");
+             // console.log("[STT] AUDIO IS SILENT AT WEB AUDIO INPUT (RMS=0)");
            } else {
-             console.log(`[STT] PCM_RMS=${rms.toFixed(5)} | Buffer=${localSTTBufferRef.current.length}`);
+             // console.log(`[STT] PCM_RMS=${rms.toFixed(5)} | Buffer=${localSTTBufferRef.current.length}`);
            }
         }
         // --------------------------
@@ -376,8 +397,8 @@ export function WorkspaceProvider({
              }
 
              const audioData = new Float32Array(localSTTBufferRef.current);
-             console.log(`[STT] CHUNK_READY start=${captureBaseTimeRef.current} duration=30 samples=${audioData.length}`);
-             console.log(`[STT] WHISPER_START baseTime=${captureBaseTimeRef.current} samples=${audioData.length}`);
+             // console.log(`[STT] CHUNK_READY start=${captureBaseTimeRef.current} duration=30 samples=${audioData.length}`);
+             // console.log(`[STT] WHISPER_START baseTime=${captureBaseTimeRef.current} samples=${audioData.length}`);
              baseTimeQueueRef.current.push(captureBaseTimeRef.current);
              workerRef.current.postMessage({ type: "transcribe", audioData });
              

@@ -176,22 +176,23 @@ export function YouTubePlayer() {
       />
 
       {isEmbedRestricted && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 p-6 text-center overflow-y-auto">
-          <div className="h-12 w-12 rounded-full bg-secondary/20 flex items-center justify-center mb-4 border border-border/50 shrink-0">
-            <VideoOff className="h-5 w-5 text-muted-foreground" />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#070B14]/90 p-6 text-center overflow-y-auto backdrop-blur-sm">
+          <div className="h-12 w-12 rounded-full flex items-center justify-center mb-4 border border-white/[0.06] shrink-0" style={{ background: 'rgba(59, 130, 246, 0.05)' }}>
+            <VideoOff className="h-5 w-5 text-electric/70" />
           </div>
-          <h3 className="text-white font-semibold mb-2 text-lg">This video can't be played here</h3>
-          <p className="text-muted-foreground text-sm max-w-sm mb-2">
+          <h3 className="text-white font-semibold mb-2 text-lg glow-blue-subtle">This video can't be played here</h3>
+          <p className="text-slate-400 text-sm max-w-sm mb-2">
             The video owner has disabled embedded playback.
           </p>
-          <p className="text-muted-foreground text-sm max-w-sm mb-6">
+          <p className="text-slate-400 text-sm max-w-sm mb-6">
             Keep the video beside your research with Picture-in-Picture.
           </p>
           <a 
             href={`https://www.youtube.com/watch?v=${videoId}`} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-primary text-background hover:bg-primary/90 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors mb-6 shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all motion-fluid duration-300 mb-6 shrink-0 border border-electric/25 hover:border-electric/40 hover:shadow-blue-glow text-white"
+            style={{ background: 'rgba(59, 130, 246, 0.12)' }}
           >
             Continue on YouTube
             <ExternalLink className="h-4 w-4" />
@@ -201,14 +202,14 @@ export function YouTubePlayer() {
             <button 
               onClick={() => setShowHelp(!showHelp)}
               aria-expanded={showHelp}
-              className="flex items-center justify-center gap-1.5 w-full text-xs font-medium text-muted-foreground hover:text-white transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+              className="flex items-center justify-center gap-1.5 w-full text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 rounded-md"
             >
               How to keep the video visible
               {showHelp ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </button>
             
             {showHelp && (
-              <div className="mt-2 p-3 bg-secondary/20 rounded-md border border-border/30 text-xs text-muted-foreground text-left leading-relaxed">
+              <div className="mt-2 p-3 rounded-md border border-white/[0.04] text-xs text-slate-400 text-left leading-relaxed" style={{ background: 'rgba(7, 11, 20, 0.5)' }}>
                 Open the video on YouTube, enable Picture-in-Picture from your browser's video controls, then return here.
               </div>
             )}

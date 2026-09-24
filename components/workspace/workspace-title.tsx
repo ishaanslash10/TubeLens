@@ -64,10 +64,11 @@ export function WorkspaceTitle({ videoId, defaultTitle }: { videoId: string, def
 
   return (
     <div 
-      className={`hidden md:flex text-sm font-medium truncate max-w-sm transition-all duration-300 ${isGenerating ? 'text-muted-foreground/60 animate-pulse' : 'text-muted-foreground'}`} 
+      className={`hidden md:flex text-xs font-medium truncate max-w-sm transition-all motion-fluid duration-500 ${isGenerating ? 'text-muted-foreground/50 animate-pulse' : 'text-slate-400'}`} 
       title={isGenerating ? "Creating workspace..." : title}
     >
-      Workspace / {title}
+      <span className="text-muted-foreground mr-1.5">Workspace /</span>
+      <span className="text-slate-300">{title}</span>
     </div>
   );
 }

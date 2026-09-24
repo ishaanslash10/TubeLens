@@ -25,6 +25,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Electric Blue Palette — illumination, not decoration */
+  --color-electric: #3B82F6;
+  --color-electric-dim: #2563EB;
+  --color-electric-bright: #60A5FA;
+  --color-electric-glow: #93C5FD;
+  --color-cyan: #06B6D4;
+  --color-cyan-dim: #0891B2;
+
   /* Brand Palette */
   --color-brand-100: #F0F4FF;
   --color-brand-500: #2563EB;
@@ -49,36 +57,38 @@
 }
 
 :root {
-  /* Crisp Editorial Aesthetic */
-  --background: #FFFFFF;
-  --foreground: #09090B; 
+  /* ═══════════════════════════════════════
+     AMOLED BLACK CINEMATIC FOUNDATION
+     ═══════════════════════════════════════ */
+  --background: #000000;
+  --foreground: #E8ECF4;
   
-  /* Primary (Ink Black) */
-  --primary: #09090B;
-  --primary-foreground: #FFFFFF;
+  /* Primary — bright white for headlines */
+  --primary: #F1F5F9;
+  --primary-foreground: #000000;
 
-  /* Secondary (Sophisticated Gray) */
-  --secondary: #F4F4F5;
-  --secondary-foreground: #18181B;
+  /* Secondary — neutral dark glass surface */
+  --secondary: rgba(255, 255, 255, 0.04);
+  --secondary-foreground: #CBD5E1;
 
-  /* Muted */
-  --muted: #F4F4F5;
-  --muted-foreground: #71717A; 
+  /* Muted — barely visible structure */
+  --muted: rgba(148, 163, 184, 0.03);
+  --muted-foreground: #64748B;
 
-  /* Accent (Refined Blue for interactions) */
-  --accent: #2563EB;
+  /* Accent — electric blue illumination */
+  --accent: #3B82F6;
   --accent-foreground: #FFFFFF;
 
   /* Destructive */
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
 
-  /* Borders & UI */
-  --border: #E4E4E7;
-  --input: #E4E4E7;
-  --ring: #09090B;
+  /* Borders — cool neutral, very subtle */
+  --border: rgba(148, 163, 184, 0.06);
+  --input: rgba(148, 163, 184, 0.06);
+  --ring: rgba(59, 130, 246, 0.3);
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -86,14 +96,23 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-accent/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased;
   }
   html {
     @apply font-sans scroll-smooth;
   }
 }
 
-/* Custom Utilities for Editorial Typography */
+/* ═══════════════════════════════════════════
+   GLASS SURFACE SYSTEM
+   
+   4 depth levels:
+   L0 — background (--background)
+   L1 — glass-surface (large workspace panels)
+   L2 — glass-panel (floating panels, cards)
+   L3 — glass-panel-active (focused/interactive)
+   L4 — glass-elevated (popovers, dropdowns)
+   ═══════════════════════════════════════════ */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -101,12 +120,188 @@
   .text-pretty {
     text-wrap: pretty;
   }
+
+  /* L1: Large workspace surfaces - nearly black */
+  .glass-surface {
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
   
-  /* Refined Shadows */
-  .shadow-editorial {
-    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
+  /* L2: Floating panels */
+  .glass-panel {
+    background: rgba(15, 15, 15, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 
+      0 4px 24px -4px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
-  .shadow-editorial-hover {
-    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  
+  /* L3: Active/focused surfaces - where blue is allowed as illumination */
+  .glass-panel-active {
+    background: rgba(12, 16, 26, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    box-shadow: 
+      0 8px 32px -4px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(59, 130, 246, 0.04),
+      inset 0 1px 0 rgba(148, 163, 184, 0.05);
   }
+
+  /* L4: Elevated popovers/dropdowns */
+  .glass-elevated {
+    background: rgba(12, 16, 26, 0.85);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    box-shadow: 
+      0 16px 48px -8px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(59, 130, 246, 0.06),
+      inset 0 1px 0 rgba(148, 163, 184, 0.05);
+  }
+
+  /* ═══════════════════════════════════════
+     SHADOW SYSTEM
+     Cinematic depth with blue undertones
+     ═══════════════════════════════════════ */
+  .shadow-cinematic {
+    box-shadow: 
+      0 4px 24px -4px rgba(0, 0, 0, 0.5),
+      0 2px 8px -2px rgba(0, 5, 20, 0.4);
+  }
+  .shadow-cinematic-lg {
+    box-shadow: 
+      0 8px 40px -8px rgba(0, 0, 0, 0.6),
+      0 4px 16px -4px rgba(0, 5, 20, 0.4);
+  }
+  .shadow-blue-glow {
+    box-shadow: 
+      0 0 24px -4px rgba(59, 130, 246, 0.15),
+      0 0 8px -2px rgba(59, 130, 246, 0.1);
+  }
+  .shadow-blue-glow-lg {
+    box-shadow: 
+      0 0 40px -4px rgba(59, 130, 246, 0.2),
+      0 0 16px -2px rgba(59, 130, 246, 0.15),
+      0 8px 32px -8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ═══════════════════════════════════════
+     MOTION SYSTEM
+     Consistent, spatial, flowing
+     ═══════════════════════════════════════ */
+  .motion-spring {
+    transition-timing-function: cubic-bezier(0.22, 0.68, 0, 1.2);
+  }
+  .motion-fluid {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .motion-smooth {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ═══════════════════════════════════════
+     BLUE ILLUMINATION LANGUAGE
+     Blue = emitted light, not painted color
+     ═══════════════════════════════════════ */
+  .glow-blue {
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 8px rgba(59, 130, 246, 0.2);
+  }
+  .glow-blue-subtle {
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  }
+  .glow-white {
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Border illumination for active states */
+  .border-glow-blue {
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 12px -2px rgba(59, 130, 246, 0.1);
+  }
+
+  /* ═══════════════════════════════════════
+     STRUCTURAL GRID
+     Faint architectural lines that give
+     the dark space a sense of structure
+     ═══════════════════════════════════════ */
+  .grid-structure {
+    background-image: 
+      linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .grid-dots {
+    background-image: radial-gradient(circle, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   AMBIENT BACKGROUND SYSTEM
+   Slow-moving blue atmospheric light
+   ═══════════════════════════════════════════ */
+@keyframes ambientDrift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  25% { transform: translate(2%, 3%) scale(1.03); opacity: 0.6; }
+  50% { transform: translate(-1%, 5%) scale(0.97); opacity: 0.5; }
+  75% { transform: translate(3%, 1%) scale(1.02); opacity: 0.55; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+}
+
+.ambient-blob {
+  position: absolute;
+  filter: blur(120px);
+  border-radius: 50%;
+  animation: ambientDrift 25s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, opacity;
+}
+
+/* Blue ambient specifically */
+.ambient-blue {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 70%);
+}
+.ambient-cyan {
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.03) 50%, transparent 70%);
+}
+.ambient-navy {
+  background: radial-gradient(circle, rgba(30, 58, 138, 0.2) 0%, rgba(30, 58, 138, 0.05) 50%, transparent 70%);
+}
+
+/* ═══════════════════════════════════════════
+   PREFERS REDUCED MOTION
+   ═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+  }
+  .motion-spring,
+  .motion-fluid,
+  .motion-smooth {
+    transition-timing-function: ease;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR STYLING — dark, minimal
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.2);
 }

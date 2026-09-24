@@ -9,16 +9,16 @@ export async function login(formData: FormData) {
   
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = (formData.get("next") as string) || "/";
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
   }
 
+  const needsUsername = !data.user.user_metadata?.username;
   revalidatePath("/", "layout");
-  redirect(next);
+  return { success: true, needsUsername };
 }
 
 export async function signup(formData: FormData) {
@@ -26,16 +26,18 @@ export async function signup(formData: FormData) {
   
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = (formData.get("next") as string) || "/";
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({ 
+    email, 
+    password,
+  });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
   }
 
   revalidatePath("/", "layout");
-  redirect(next);
+  return { success: true, needsUsername: true };
 }
 
 export async function signout() {
@@ -43,4 +45,24 @@ export async function signout() {
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+export async function saveUsername(formData: FormData) {
+  const supabase = await createClient();
+  const username = formData.get("username") as string;
+  
+  if (!username || username.trim() === "") {
+    return { error: "Username is required." };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: { username: username.trim() }
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+  
+  revalidatePath("/", "layout");
+  return { success: true };
 }
